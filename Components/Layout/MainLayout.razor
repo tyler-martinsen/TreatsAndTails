@@ -1,18 +1,19 @@
 ﻿@using TreatsAndTails.Components
 @inherits LayoutComponentBase
 
-<MyMudThemeProvider />
+<MyMudThemeProvider _IsDarkMode="@IsDarkMode"/>
+
+<MudDialogProvider />
+<MudSnackbarProvider />
 
 <div class="page mud-layout">
 
     <div class="sidebar mud-elevation-1">
         <div class="top-row mud-drawer-head">
             <div>
-                <a class="navbar-brand" href="https://mudblazor.com/" target="_blank">MudBlazor</a>
+                <h2>Treats & Tails</h2>
             </div>
         </div>
-
-        <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
         <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
             <NavMenu />
         </div>
@@ -21,8 +22,7 @@
 
      <main>
         <div class="top-row px-4">
-            <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Style="color: white;" Link="https://mudblazor.com/" Target="_blank" />
-            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Style="color: white;" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+            <MudSwitch @bind-Value="@IsDarkMode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
         </div>
 
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-2 pt-2">
@@ -37,3 +37,6 @@
     <a class="dismiss">🗙</a>
 </div>
 
+@code {
+    public bool IsDarkMode { get; set; }
+}

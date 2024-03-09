@@ -1,19 +1,100 @@
-﻿<CascadingValue Value=false Name="UsePopoverProvider">
-    <MudThemeProvider Theme="MyTheme"></MudThemeProvider>
-</CascadingValue>
+﻿
+<MudThemeProvider Theme="PurpleMode" @bind-IsDarkMode="_IsDarkMode"></MudThemeProvider>
+
 
 @code {
-    public static MudTheme MyTheme => new()
-        {
-            Palette = new PaletteLight()
-            {
-                Primary = "#594AE2",
-                AppbarBackground = "#594AE2"
-            },
-            PaletteDark = new PaletteDark()
-            {
-                Primary = "#594AE2",
-                AppbarBackground = "#594AE2"
-            }
-        };
+	[Parameter]
+	public bool _IsDarkMode { get; set; }
+
+	public static MudTheme MyTheme => new()
+		{
+			Palette = new PaletteLight()
+			{
+				Primary = "#594AE2",
+				AppbarBackground = "#594AE2"
+			},
+			PaletteDark = new PaletteDark()
+			{
+				Primary = "#594AE2",
+				AppbarBackground = "#594AE2"
+			}
+		};
+
+	public static MudTheme PurpleMode = new MudTheme()
+		{
+			Palette = new PaletteLight()
+			{
+				Primary = "#9c27b0", // purple 500
+				Secondary = "#ba68c8", // purple A200
+				Tertiary = "#e1bee7", // purple 100
+
+				Black = "#272c34",
+				White = "#ffffff",
+				AppbarBackground = "#9c27b0", // purple 500
+				DrawerBackground = "#ba68c8", // purple A200
+				DrawerText = "#ffffff",
+				Success = "#4caf50",
+				SuccessDarken = "#388e3c",
+				SuccessLighten = "#81c784",
+				Info = "#2196f3",
+				InfoDarken = "#1976d2",
+				InfoLighten = "#64b5f6",
+				Warning = "#ff9800",
+				WarningDarken = "#f57c00",
+				WarningLighten = "#ffb74d",
+				Error = "#f44336",
+				ErrorDarken = "#d32f2f",
+				ErrorLighten = "#e57373",
+				Background = "#f5f5f5",
+				BackgroundGrey = "#fafafa",
+				Surface = "#ffffff",
+				DrawerIcon = "#ffffff",
+				AppbarText = "#ffffff",
+				TextPrimary = "#272c34",
+				TextSecondary = "#757575",
+				ActionDefault = "#272c34",
+				ActionDisabled = "#bdbdbd",
+				ActionDisabledBackground = "#ffffff",
+				Divider = "rgba(0, 0, 0, 0.12)",
+				TableLines = "rgba(0, 0, 0, 0.12)",
+				HoverOpacity = 0.08
+			},
+			PaletteDark = new PaletteDark()
+			{
+				Primary = "#9c27b0", // purple 500
+				Secondary = "#ba68c8", // purple A200
+				Tertiary = "#e1bee7", // purple 100
+
+				Black = "#121212", // Darker black
+				White = "#ffffff",
+				AppbarBackground = "#121212", // Darker appbar background
+				DrawerBackground = "#1a237e", // Darker drawer background (adjust as needed)
+				DrawerText = "#ffffff",
+				Success = "#4caf50",
+				SuccessDarken = "#388e3c",
+				SuccessLighten = "#81c784",
+				Info = "#2196f3",
+				InfoDarken = "#1976d2",
+				InfoLighten = "#64b5f6",
+				Warning = "#ff9800",
+				WarningDarken = "#f57c00",
+				WarningLighten = "#ffb74d",
+				Error = "#f44336",
+				ErrorDarken = "#d32f2f",
+				ErrorLighten = "#e57373",
+				Background = "#121212", // Darker background
+				BackgroundGrey = "#1e1e1e", // Darker background grey
+				Surface = "#333333", // Darker surface color (adjust as needed)
+				DrawerIcon = "#ffffff",
+				AppbarText = "#ffffff",
+				TextPrimary = "#ffffff", // White text for better contrast
+				TextSecondary = "#757575",
+				ActionDefault = "#ffffff", // White action default color
+				ActionDisabled = "#bdbdbd",
+				ActionDisabledBackground = "#333333", // Darker background for disabled actions
+				Divider = "rgba(255, 255, 255, 0.12)", // Lighter divider color
+				TableLines = "rgba(255, 255, 255, 0.12)", // Lighter table lines color
+				HoverOpacity = 0.08
+			}
+		};
 }
