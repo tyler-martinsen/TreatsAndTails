@@ -1,4 +1,5 @@
 ﻿@using FluentValidation
+@inject TreatsAndTails.Components.Services.AesService AesService
 
 <MudCard>
     <MudForm Model="@model" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
