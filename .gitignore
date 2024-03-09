@@ -230,7 +230,8 @@ _pkginfo.txt
 !?*.[Cc]ache/
 
 # Others
-Database/
+Database/CreateUser.sql
+Database/Scaffold.txt
 ClientBin/
 ~$*
 *~
