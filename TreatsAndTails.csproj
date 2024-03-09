@@ -12,5 +12,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="MudBlazor" Version="6.*" />
   </ItemGroup>
+
+  
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
   
 </Project>
