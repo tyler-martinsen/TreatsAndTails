@@ -1,0 +1,53 @@
+USE TAT
+GO
+
+CREATE TABLE inventory.Products(
+	Id INT IDENTITY(1, 1) PRIMARY KEY
+	,InvName NVARCHAR(100) NOT NULL
+	,InvDescription NVARCHAR(100) NOT NULL
+	,ImageName NVARCHAR(100) NOT NULL
+	,Cost INT NOT NULL
+	,Quantity INT NOT NULL
+);
+
+CREATE TABLE lookups.States(
+	Id INT IDENTITY(1, 1) PRIMARY KEY
+	,StateName CHAR(13) NOT NULL
+	,StateAbbreviation CHAR(2) NOT NULL
+);
+
+CREATE TABLE users.Users(
+	Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID()
+	,Email NVARCHAR(100) UNIQUE NOT NULL
+    ,PasswordHash BINARY(32) NOT NULL
+    ,FirstName NVARCHAR(50) NOT NULL
+    ,LastName NVARCHAR(50) NOT NULL
+    ,PhoneNumber NVARCHAR(20)
+	,IsAdmin BIT NOT NULL
+    ,RegistrationDate DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE users.Locations(
+	UserId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES users.Users(Id)
+    ,PhysicalAddressLine1 NVARCHAR(255) NOT NULL
+	,PhysicalAddressLine2 NVARCHAR(255) NULL
+	,PhysicalAddressCity NVARCHAR(255) NOT NULL
+	,PhysicalAddressState INT FOREIGN KEY REFERENCES lookups.States(Id) NOT NULL
+	,PhysicalAddressZip NVARCHAR(5) NOT NULL
+);
+GO
+
+CREATE TABLE users.Preferences(
+	UserId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES users.Users(Id)
+	,IsDarkMode BIT NOT NULL
+);
+GO
+
+CREATE TABLE users.Products(
+	UserId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES users.Users(Id)
+	,Ordered INT NOT NULL
+	,Shipped INT NOT NULL
+	,Delivered INT NOT NULL
+);
+GO

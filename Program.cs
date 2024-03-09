@@ -9,6 +9,15 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
+var defaultConnectionPassword = Environment.GetEnvironmentVariable("DefaultConnectionPassword");
+
+if (!string.IsNullOrEmpty(defaultConnectionPassword))
+{
+    builder.Configuration["ConnectionStrings:DefaultConnection:Password"] = defaultConnectionPassword;
+}
+
+builder.Configuration.AddEnvironmentVariables();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,3 +37,4 @@ app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode();
 
 app.Run();
+
