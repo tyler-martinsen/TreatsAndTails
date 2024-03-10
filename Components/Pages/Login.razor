@@ -1,0 +1,61 @@
+﻿@page "/login"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using TreatsAndTails.Components.Shared
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
+	<CascadingAuthenticationState>
+		<h1>Login</h1>
+		<MudCard>
+			<AuthorizeView>
+				<Authorized>
+					<p>You are already logged in.</p>
+				</Authorized>
+				<NotAuthorized>
+					<MudForm>
+						<MudTextField Label="Username" @bind-Value="username" />
+						<MudTextField Label="Password" Type="Password" @bind-Value="password" />
+						<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
+					</MudForm>
+				</NotAuthorized>
+			</AuthorizeView>
+		</MudCard>
+	</CascadingAuthenticationState>
+</MudContainer>
+
+@code {
+	private string username;
+	private string password;
+
+	private async Task SubmitForm()
+	{
+		// Perform authentication logic here
+
+		// Example: Simulate authentication with a simple check
+		if (username == "demo" && password == "demo")
+		{
+			var identity = new ClaimsIdentity(new[]
+			{
+				new Claim(ClaimTypes.Name, username),
+			}, "custom");
+
+			var user = new ClaimsPrincipal(identity);
+
+			var authState = new AuthenticationState(user);
+
+			// In a Blazor Server app, use the following code to set the authentication state
+			((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+
+			// Redirect to the home page or another protected page
+			NavigationManager.NavigateTo("/cascade-auth-state");
+		}
+		else
+		{
+			// Handle invalid login
+			// Show error message or redirect to an error page
+			NavigationManager.NavigateTo("/error");
+		}
+	}
+}

@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 using TreatsAndTails.Components;
 using TreatsAndTails.Components.Services;
+using TreatsAndTails.Components.Shared;
 using TreatsAndTails.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +18,16 @@ builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<TatContext>();
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 builder.Services.AddMudServices();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+	// Configure JWT authentication options here
+});
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
 var defaultConnectionPassword = Environment.GetEnvironmentVariable("DefaultConnectionPassword");
 

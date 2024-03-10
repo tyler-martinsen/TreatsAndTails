@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using TreatsAndTails.Models;
 
 namespace TreatsAndTails.Components.Services
@@ -12,7 +13,7 @@ namespace TreatsAndTails.Components.Services
             this._context = context;
         }
 
-        public async Task<bool> AddUser(_User userInput)
+        public async Task<bool> AddUserAsync(_User userInput)
         {
             User user = new User
             {
@@ -39,5 +40,34 @@ namespace TreatsAndTails.Components.Services
             }
             return await Task.FromResult(false);
         }
+
+        public async Task<bool> SetDarkmodeAsync(string? email, bool isDarkMode)
+        {
+            if (email == null)
+            {
+                return await Task.FromResult(false);
+            }
+			User? currentUser = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+			if (currentUser != null)
+			{
+                Preference? userPreference = await _context.Preferences.FirstOrDefaultAsync(user => user.Equals(currentUser));
+
+                if (userPreference != null)
+                {
+                    userPreference.IsDarkMode = isDarkMode;
+                }
+                else
+                {
+                    userPreference = new Preference {
+						UserId = currentUser.Id,
+						IsDarkMode = isDarkMode
+                    };
+                    await _context.Preferences.AddAsync(userPreference);
+                }
+
+				return await _context.SaveChangesAsync() > 1;
+			}
+            return await Task.FromResult(false);
+		}
     }
 }

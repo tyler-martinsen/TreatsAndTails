@@ -1,44 +1,48 @@
 ﻿@using TreatsAndTails.Components
+@using TreatsAndTails.Components.Services
 @inherits LayoutComponentBase
+@inject UserService UserService
 
 <MyMudThemeProvider _IsDarkMode="@IsDarkMode"></MyMudThemeProvider>
 
 <MudLayout>
-    <MudAppBar Elevation="1" Dense="@dense">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        <MudSpacer />
-        <MudSwitch ValueChanged="@ToggleDarkmode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive">
-        <MudDrawerHeader>
-            <MudImage Fluid="true" Src="images/branding/icon3.png" Alt="Icon" Class="rounded-lg" />
-        </MudDrawerHeader>
-        <MudNavMenu>
-            <MudNavLink Match="NavLinkMatch.All">Home</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-2 pt-2">
-            @Body
-        </MudContainer>
-    </MudMainContent>
+	<MudAppBar Elevation="1" Dense="@dense">
+		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+		<MudSpacer />
+		<MudSwitch ValueChanged="@ToggleDarkmode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
+	</MudAppBar>
+	<MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive">
+		<MudDrawerHeader>
+			<MudImage Fluid="true" Src="images/branding/icon3.png" Alt="Icon" Class="rounded-lg" />
+		</MudDrawerHeader>
+		<MudNavMenu>
+			<MudNavLink Match="NavLinkMatch.All" Href="/">Home</MudNavLink>
+			<MudNavLink Match="NavLinkMatch.All" Href="/login">Login</MudNavLink>
+			<MudNavLink Match="NavLinkMatch.All" Href="/register">Register</MudNavLink>
+		</MudNavMenu>
+	</MudDrawer>
+	<MudMainContent>
+		@Body
+	</MudMainContent>
 </MudLayout>
 
 
 @code {
-    bool open { get; set; } = true;
-    bool dense { get; set; } = false;
-    public bool IsDarkMode { get; set; }
+	bool open { get; set; } = true;
+	bool dense { get; set; } = false;
+	public bool IsDarkMode { get; set; }
+	string? email = null;
 
-    DrawerClipMode clipMode = DrawerClipMode.Never;
+	DrawerClipMode clipMode = DrawerClipMode.Never;
 
-    void ToggleDrawer()
-    {
-        open = !open;
-    }
+	void ToggleDrawer()
+	{
+		open = !open;
+	}
 
-    void ToggleDarkmode()
-    {
-        IsDarkMode = !IsDarkMode;
-    }
+	async void ToggleDarkmode()
+	{
+		IsDarkMode = !IsDarkMode;
+		await UserService.SetDarkmodeAsync(email, IsDarkMode);
+	}
 }
