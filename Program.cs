@@ -18,14 +18,20 @@ builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<TatContext>();
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 builder.Services.AddMudServices();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-	// Configure JWT authentication options here
-});
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//}).AddJwtBearer(options =>
+//{
+//	// Configure JWT authentication options here
+//});
+builder.Services.AddAuthentication("Cookies")
+	.AddCookie(options =>
+	{
+		options.Cookie.HttpOnly = true;
+		options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+	});
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
