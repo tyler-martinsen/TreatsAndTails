@@ -17,5 +17,7 @@ public partial class User
 
     public string? PhoneNumber { get; set; }
 
+    public bool IsAdmin { get; set; }
+
     public DateTime RegistrationDate { get; set; }
 }

@@ -19,6 +19,10 @@ public partial class TatContext : DbContext
 
     public virtual DbSet<Preference> Preferences { get; set; }
 
+    public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<Product1> Products1 { get; set; }
+
     public virtual DbSet<State> States { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -43,11 +47,11 @@ public partial class TatContext : DbContext
             entity.HasOne(d => d.PhysicalAddressStateNavigation).WithMany()
                 .HasForeignKey(d => d.PhysicalAddressState)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Locations__Physi__3E52440B");
+                .HasConstraintName("FK__Locations__Physi__403A8C7D");
 
             entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Locations__UserI__3D5E1FD2");
+                .HasConstraintName("FK__Locations__UserI__3F466844");
         });
 
         modelBuilder.Entity<Preference>(entity =>
@@ -58,12 +62,35 @@ public partial class TatContext : DbContext
 
             entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Preferenc__UserI__403A8C7D");
+                .HasConstraintName("FK__Preferenc__UserI__4222D4EF");
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Products__3214EC076BBB1524");
+
+            entity.ToTable("Products", "inventory");
+
+            entity.Property(e => e.Cost).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.InvFlavor).HasMaxLength(100);
+            entity.Property(e => e.InvShape).HasMaxLength(100);
+            entity.Property(e => e.InvSize).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<Product1>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("Products", "users");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__Products__UserId__440B1D61");
         });
 
         modelBuilder.Entity<State>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__States__3214EC074B8553FD");
+            entity.HasKey(e => e.Id).HasName("PK__States__3214EC07117E6E2D");
 
             entity.ToTable("States", "lookups");
 
@@ -72,25 +99,25 @@ public partial class TatContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength();
             entity.Property(e => e.StateName)
-                .HasMaxLength(13)
+                .HasMaxLength(20)
                 .IsUnicode(false)
                 .IsFixedLength();
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC074DFB86FF");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07D73FF19A");
 
             entity.ToTable("Users", "users");
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534A78B7DED").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D1053443CAC171").IsUnique();
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
             entity.Property(e => e.PasswordHash)
-                .HasMaxLength(64)
+                .HasMaxLength(32)
                 .IsFixedLength();
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
             entity.Property(e => e.RegistrationDate)
