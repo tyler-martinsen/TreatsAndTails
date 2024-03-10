@@ -1,201 +1,147 @@
 ﻿@using FluentValidation
-@inject TreatsAndTails.Components.Services.AesService AesService
+@using TreatsAndTails.Models
 
-<MudCard>
-    <MudForm Model="@model" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
-        <MudCardContent>
-            <MudTextField @bind-Value="model.Name"
-                          For="@(() => model.Name)"
-                          Immediate="true"
-                          Label="Name" />
-
-            <MudTextField @bind-Value="model.Email"
-                          For="@(() => model.Email)"
-                          Immediate="true"
-                          Label="Email" />
-
-            <MudTextField @bind-Value="model.CCNumber"
-                          For="@(() => model.CCNumber)"
-                          Immediate="true"
-                          Label="Credit card nr" />
-
-            <MudTextField @bind-Value="model.Address.Address"
-                          For="@(() => model.Address.Address)"
-                          Immediate="true"
-                          Label="Address" />
-
-            <MudTextField @bind-Value="model.Address.City"
-                          For="@(() => model.Address.City)"
-                          Immediate="true"
-                          Label="City" />
-
-            <MudTextField @bind-Value="model.Address.Country"
-                          For="@(() => model.Address.Country)"
-                          Immediate="true"
-                          Label="Country" />
-        </MudCardContent>
-        <MudCardContent Class="pa-0">
-
-            <MudTable Items="@model.OrderDetails" Hover="true" Breakpoint="Breakpoint.None" Dense="@true" Elevation="0">
-                <HeaderContent>
-                    <MudTh>Description</MudTh>
-                    <MudTh>Offer</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Description">
-                        <MudForm Model="@context" Validation=@(orderDetailsValidator.ValidateValue)>
-                            <MudTextField Label="Enter Description"
-                                          @bind-Value="context.Description"
-                                          For="(() => context.Description)" />
-                        </MudForm>
-                    </MudTd>
-                    <MudTd DataLabel="Offer">
-                        <MudForm Model="@context">
-                            <MudNumericField Label="Enter Offer"
-                                             @bind-Value="context.Offer"
-                                             Validation=@(orderDetailsValidator.ValidateValue)
-                                             For="(() => context.Offer)" />
-                        </MudForm>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-
-        </MudCardContent>
-    </MudForm>
-    <MudCardActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Order</MudButton>
-    </MudCardActions>
-</MudCard>
+<div style="display:flex;justify-content:left;align-items:center;height:auto;">
+	<MudCard>
+		<MudForm Model="@user" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
+			<MudCardContent>
+				<h1>Register</h1>
+				<MudTextField @bind-Value="user.Email"
+							  For="@(() => user.Email)"
+							  Immediate="true"
+							  Label="Email" />
+				<MudTextField @bind-Value="user.Password"
+							  For="@(() => user.Password)"
+							  Immediate="true"
+							  Label="Password"
+							  Variant="Variant.Filled"
+							  InputType="@PasswordInput"
+							  Adornment="Adornment.End"
+							  AdornmentIcon="@PasswordInputIcon"
+							  OnAdornmentClick="ButtonTestclick"
+							  AdornmentAriaLabel="Show Password" />
+				<MudTextField @bind-Value="user.PasswordConfirmed"
+							  For="@(() => user.PasswordConfirmed)"
+							  Immediate="true"
+							  Label="Confirm Password"
+							  Variant="Variant.Filled"
+							  InputType="@PasswordInput"
+							  Adornment="Adornment.End"
+							  AdornmentIcon="@PasswordInputIcon"
+							  OnAdornmentClick="ButtonTestclick"
+							  AdornmentAriaLabel="Show Password" />
+				<MudTextField @bind-Value="user.FirstName"
+							  For="@(() => user.FirstName)"
+							  Immediate="true"
+							  Label="First Name" />
+				<MudTextField @bind-Value="user.LastName"
+							  For="@(() => user.LastName)"
+							  Immediate="true"
+							  Label="Last Name" />
+				<MudTextField @bind-Value="user.PhoneNumber"
+							  For="@(() => user.PhoneNumber)"
+							  Immediate="true"
+							  Label="Phone Number"
+							  Mask="@(new PatternMask("(000)000-0000"))" />
+			</MudCardContent>
+		</MudForm>
+		<MudCardActions>
+			<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Register</MudButton>
+		</MudCardActions>
+	</MudCard>
+</div>
 
 @code {
-    [Inject] ISnackbar Snackbar { get; set; }
+	[Inject] ISnackbar Snackbar { get; set; }
 
-    MudForm form;
+	MudForm form;
 
-    OrderModelFluentValidator orderValidator = new OrderModelFluentValidator();
+	UserFluentValidator orderValidator = new UserFluentValidator();
 
-    OrderDetailsModelFluentValidator orderDetailsValidator = new OrderDetailsModelFluentValidator();
+	_User user = new _User();
 
-    OrderModel model = new OrderModel();
+	bool isShow;
+	InputType PasswordInput = InputType.Password;
+	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
-    public class OrderModel
-    {
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string CCNumber { get; set; } = "4012 8888 8888 1881";
-        public AddressModel Address { get; set; } = new AddressModel();
-        public List<OrderDetailsModel> OrderDetails = new List<OrderDetailsModel>()
-        {
-            new OrderDetailsModel()
-                {
-                    Description = "Perform Work order 1",
-                    Offer = 100
-                },
-            new OrderDetailsModel()
-        };
-    }
+	void ButtonTestclick()
+	{
+		@if (isShow)
+		{
+			isShow = false;
+			PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+			PasswordInput = InputType.Password;
+		}
+		else
+		{
+			isShow = true;
+			PasswordInputIcon = Icons.Material.Filled.Visibility;
+			PasswordInput = InputType.Text;
+		}
+	}
 
-    public class AddressModel
-    {
-        public string Address { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-    }
+	private async Task Submit()
+	{
+		await form.Validate();
 
-    public class OrderDetailsModel
-    {
-        public string Description { get; set; }
-        public decimal Offer { get; set; }
-    }
+		if (form.IsValid)
+		{
+			Snackbar.Add("Submited!");
+		}
+	}
 
-    private async Task Submit()
-    {
-        await form.Validate();
+	/// <summary>
+	/// A standard AbstractValidator which contains multiple rules and can be shared with the back end API
+	/// </summary>
+	/// <typeparam name="User"></typeparam>
+	public class UserFluentValidator : AbstractValidator<_User>
+	{
+		public UserFluentValidator()
+		{
+			RuleFor(x => x.Email)
+				.Cascade(CascadeMode.Stop)
+				.NotEmpty()
+				.EmailAddress()
+				.MustAsync(async (value, cancellationToken) => await IsUniqueAsync(value));
 
-        if (form.IsValid)
-        {
-            Snackbar.Add("Submited!");
-        }
-    }
+			RuleFor(user => user.Password)
+				.NotEmpty().WithMessage("Password is required.")
+				.MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
+				.Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
+				.Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
+				.Matches("[0-9]").WithMessage("Password must contain at least one numeric digit.")
+				.Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
 
-    /// <summary>
-    /// A standard AbstractValidator which contains multiple rules and can be shared with the back end API
-    /// </summary>
-    /// <typeparam name="OrderModel"></typeparam>
-    public class OrderModelFluentValidator : AbstractValidator<OrderModel>
-    {
-        public OrderModelFluentValidator()
-        {
-            RuleFor(x => x.Name)
-                .NotEmpty()
-                .Length(1, 100);
+			RuleFor(user => user.PasswordConfirmed)
+				.NotEmpty().WithMessage("Password confirmation is required.")
+				.Equal(user => user.Password).WithMessage("Password confirmation does not match the password.");
 
-            RuleFor(x => x.Email)
-                .Cascade(CascadeMode.Stop)
-                .NotEmpty()
-                .EmailAddress()
-                .MustAsync(async (value, cancellationToken) => await IsUniqueAsync(value));
+			RuleFor(x => x.FirstName)
+				.NotEmpty()
+				.Length(1, 100);
 
-            RuleFor(x => x.CCNumber)
-                .NotEmpty()
-                .Length(1, 100)
-                .CreditCard();
+			RuleFor(x => x.LastName)
+				.NotEmpty()
+				.Length(1, 100);
 
-            RuleFor(x => x.Address.Address)
-                .NotEmpty()
-                .Length(1, 100);
+			RuleFor(x => x.PhoneNumber)
+				.NotEmpty().WithMessage("Phone number is required.")
+				.Matches(@"^\(\d{3}\)\d{3}-\d{4}$").WithMessage("Invalid phone number format. Please use the format (123)456-789");
+		}
 
-            RuleFor(x => x.Address.City)
-                .NotEmpty()
-                .Length(1, 100);
+		private async Task<bool> IsUniqueAsync(string email)
+		{
+			// Simulates a long running http call
+			await Task.Delay(2000);
+			return email.ToLower() != "test@test.com";
+		}
 
-            RuleFor(x => x.Address.Country)
-                .NotEmpty()
-                .Length(1, 100);
-
-            RuleForEach(x => x.OrderDetails)
-                .SetValidator(new OrderDetailsModelFluentValidator());
-        }
-
-        private async Task<bool> IsUniqueAsync(string email)
-        {
-            // Simulates a long running http call
-            await Task.Delay(2000);
-            return email.ToLower() != "test@test.com";
-        }
-
-        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
-        {
-            var result = await ValidateAsync(ValidationContext<OrderModel>.CreateWithOptions((OrderModel)model, x => x.IncludeProperties(propertyName)));
-            if (result.IsValid)
-                return Array.Empty<string>();
-            return result.Errors.Select(e => e.ErrorMessage);
-        };
-    }
-
-    /// <summary>
-    /// A standard AbstractValidator for the Collection Object
-    /// </summary>
-    /// <typeparam name="OrderDetailsModel"></typeparam>
-    public class OrderDetailsModelFluentValidator : AbstractValidator<OrderDetailsModel>
-    {
-        public OrderDetailsModelFluentValidator()
-        {
-            RuleFor(x => x.Description)
-                .NotEmpty()
-                .Length(1, 100);
-
-            RuleFor(x => x.Offer)
-                .GreaterThan(0)
-                .LessThan(999);
-        }
-
-        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
-        {
-            var result = await ValidateAsync(ValidationContext<OrderDetailsModel>.CreateWithOptions((OrderDetailsModel)model, x => x.IncludeProperties(propertyName)));
-            if (result.IsValid)
-                return Array.Empty<string>();
-            return result.Errors.Select(e => e.ErrorMessage);
-        };
-    }
+		public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+		{
+			var result = await ValidateAsync(ValidationContext<_User>.CreateWithOptions((_User)model, x => x.IncludeProperties(propertyName)));
+			if (result.IsValid)
+				return Array.Empty<string>();
+			return result.Errors.Select(e => e.ErrorMessage);
+		};
+	}
 }

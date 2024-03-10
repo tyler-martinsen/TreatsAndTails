@@ -1,42 +1,39 @@
 ﻿@using TreatsAndTails.Components
 @inherits LayoutComponentBase
 
-<MyMudThemeProvider _IsDarkMode="@IsDarkMode"/>
+<MyMudThemeProvider _IsDarkMode="@IsDarkMode"></MyMudThemeProvider>
 
-<MudDialogProvider />
-<MudSnackbarProvider />
-
-<div class="page mud-layout">
-
-    <div class="sidebar mud-elevation-1">
-        <div class="top-row mud-drawer-head">
-            <div>
-                <h2>Treats & Tails</h2>
-            </div>
-        </div>
-        <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-            <NavMenu />
-        </div>
-
-    </div>
-
-     <main>
-        <div class="top-row px-4">
-            <MudSwitch @bind-Value="@IsDarkMode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
-        </div>
-
+<MudLayout>
+    <MudAppBar Elevation="1" Dense="@dense">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudSpacer />
+        <MudSwitch @bind-Value="@IsDarkMode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive">
+        <MudDrawerHeader>
+            <MudImage Fluid="true" Src="images/branding/icon3.png" Alt="Icon" Class="rounded-lg" />
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Match="NavLinkMatch.All">Home</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-2 pt-2">
             @Body
         </MudContainer>
-    </main>
-</div>
+    </MudMainContent>
+</MudLayout>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
 
 @code {
+    bool open = true;
+    bool dense = false;
+    DrawerClipMode clipMode = DrawerClipMode.Never;
+
     public bool IsDarkMode { get; set; }
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
 }
