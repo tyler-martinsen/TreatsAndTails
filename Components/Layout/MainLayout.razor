@@ -7,7 +7,7 @@
     <MudAppBar Elevation="1" Dense="@dense">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
         <MudSpacer />
-        <MudSwitch @bind-Value="@IsDarkMode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
+        <MudSwitch ValueChanged="@ToggleDarkmode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
     </MudAppBar>
     <MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive">
         <MudDrawerHeader>
@@ -26,14 +26,19 @@
 
 
 @code {
-    bool open = true;
-    bool dense = false;
-    DrawerClipMode clipMode = DrawerClipMode.Never;
-
+    bool open { get; set; } = true;
+    bool dense { get; set; } = false;
     public bool IsDarkMode { get; set; }
+
+    DrawerClipMode clipMode = DrawerClipMode.Never;
 
     void ToggleDrawer()
     {
         open = !open;
+    }
+
+    void ToggleDarkmode()
+    {
+        IsDarkMode = !IsDarkMode;
     }
 }

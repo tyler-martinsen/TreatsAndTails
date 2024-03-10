@@ -1,5 +1,10 @@
-﻿@using FluentValidation
-@using TreatsAndTails.Models
+﻿@using FluentValidation;
+@using TreatsAndTails.Models;
+@using TreatsAndTails.Components.Services;
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Register</PageTitle>
 
 <div style="display:flex;justify-content:left;align-items:center;height:auto;">
 	<MudCard>
@@ -86,7 +91,11 @@
 
 		if (form.IsValid)
 		{
-			Snackbar.Add("Submited!");
+			if(await UserService.AddUser(user))
+			{
+				Snackbar.Add("Submited!");
+				NavigationManager.NavigateTo("/Login");
+			}
 		}
 	}
 

@@ -1,12 +1,18 @@
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 using TreatsAndTails.Components;
+using TreatsAndTails.Components.Services;
+using TreatsAndTails.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
-
+builder.Services.AddMudServices();
+builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<TatContext>();
+StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 builder.Services.AddMudServices();
 
 var defaultConnectionPassword = Environment.GetEnvironmentVariable("DefaultConnectionPassword");
