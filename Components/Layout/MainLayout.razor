@@ -1,5 +1,12 @@
 ﻿@using TreatsAndTails.Components
 @using TreatsAndTails.Components.Services
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using TreatsAndTails.Components.Shared
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 @inject UserService UserService
 
@@ -22,7 +29,27 @@
 		</MudNavMenu>
 	</MudDrawer>
 	<MudMainContent>
-		@Body
+		<CascadingAuthenticationState>
+	<AuthorizeView>
+		<Authorized>
+			@Body
+		</Authorized>
+		<NotAuthorized>
+			<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
+				<MudCard>
+					<MudCardContent>
+						<MudForm>
+							<h1>Login</h1>
+							<MudTextField Label="Username" @bind-Value="username" />
+							<MudTextField Label="Password" Type="Password" @bind-Value="password" />
+							<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
+						</MudForm>
+					</MudCardContent>
+				</MudCard>
+			</MudContainer>
+		</NotAuthorized>
+	</AuthorizeView>
+</CascadingAuthenticationState>
 	</MudMainContent>
 </MudLayout>
 
@@ -32,6 +59,9 @@
 	bool dense { get; set; } = false;
 	public bool IsDarkMode { get; set; }
 	string? email = null;
+
+	private string username;
+	private string password;
 
 	DrawerClipMode clipMode = DrawerClipMode.Never;
 
@@ -44,5 +74,39 @@
 	{
 		IsDarkMode = !IsDarkMode;
 		await UserService.SetDarkmodeAsync(email, IsDarkMode);
+	}
+
+	private async Task SubmitForm()
+	{
+		// Perform authentication logic here
+
+		// Example: Simulate authentication with a simple check
+		if (username == "demo" && password == "demo")
+		{
+			var identity = new ClaimsIdentity(new[]
+			{
+				new Claim(ClaimTypes.Name, username),
+			}, "custom");
+
+			var user = new ClaimsPrincipal(identity);
+
+			var authState = new AuthenticationState(user);
+
+			// Store Auth State
+			await ProtectedSessionStore.SetAsync("username", username);
+			await ProtectedSessionStore.SetAsync("password", password);
+
+			// In a Blazor Server app, use the following code to set the authentication state
+			((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+
+			// Redirect to the home page or another protected page
+			NavigationManager.NavigateTo("/");
+		}
+		else
+		{
+			// Handle invalid login
+			// Show error message or redirect to an error page
+			NavigationManager.NavigateTo("/error");
+		}
 	}
 }

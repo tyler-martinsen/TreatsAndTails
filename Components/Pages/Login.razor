@@ -7,25 +7,29 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-	<CascadingAuthenticationState>
-		<MudCard>
-			<AuthorizeView>
-				<Authorized>
-					<Error></Error>
-				</Authorized>
-				<NotAuthorized>
-					<MudForm>
-						<h1>Login</h1>
-						<MudTextField Label="Username" @bind-Value="username" />
-						<MudTextField Label="Password" Type="Password" @bind-Value="password" />
-						<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
-					</MudForm>
-				</NotAuthorized>
-			</AuthorizeView>
-		</MudCard>
-	</CascadingAuthenticationState>
-</MudContainer>
+
+<CascadingAuthenticationState>
+	<AuthorizeView>
+		<Authorized>
+			<Error></Error>
+		</Authorized>
+		<NotAuthorized>
+			<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
+				<MudCard>
+					<MudCardContent>
+						<MudForm>
+							<h1>Login</h1>
+							<MudTextField Label="Username" @bind-Value="username" />
+							<MudTextField Label="Password" Type="Password" @bind-Value="password" />
+							<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
+						</MudForm>
+					</MudCardContent>
+				</MudCard>
+			</MudContainer>
+		</NotAuthorized>
+	</AuthorizeView>
+</CascadingAuthenticationState>
+
 
 @code {
 	private string username;
@@ -48,7 +52,8 @@
 			var authState = new AuthenticationState(user);
 
 			// Store Auth State
-			// await ProtectedSessionStore.SetAsync("AuthState", authState);
+			await ProtectedSessionStore.SetAsync("username", username);
+			await ProtectedSessionStore.SetAsync("password", password);
 
 			// In a Blazor Server app, use the following code to set the authentication state
 			((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
