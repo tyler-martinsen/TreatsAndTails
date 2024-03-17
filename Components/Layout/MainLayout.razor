@@ -9,8 +9,12 @@
 @inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 @inject UserService UserService
+@inject AesService AesService
+@inject ISnackbar Snackbar
 
 <MyMudThemeProvider _IsDarkMode="@IsDarkMode"></MyMudThemeProvider>
+
+<MudSnackbarProvider></MudSnackbarProvider>
 
 <MudLayout>
 	<MudAppBar Elevation="1" Dense="@dense">
@@ -30,26 +34,26 @@
 	</MudDrawer>
 	<MudMainContent>
 		<CascadingAuthenticationState>
-	<AuthorizeView>
-		<Authorized>
-			@Body
-		</Authorized>
-		<NotAuthorized>
-			<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-				<MudCard>
-					<MudCardContent>
-						<MudForm>
-							<h1>Login</h1>
-							<MudTextField Label="Username" @bind-Value="username" />
-							<MudTextField Label="Password" Type="Password" @bind-Value="password" />
-							<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
-						</MudForm>
-					</MudCardContent>
-				</MudCard>
-			</MudContainer>
-		</NotAuthorized>
-	</AuthorizeView>
-</CascadingAuthenticationState>
+			<AuthorizeView>
+				<Authorized>
+					@Body
+				</Authorized>
+				<NotAuthorized>
+					<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
+						<MudCard>
+							<MudCardContent>
+								<MudForm>
+									<h1>Login</h1>
+									<MudTextField Label="Username" @bind-Value="username" />
+									<MudTextField Label="Password" Type="Password" @bind-Value="password" />
+									<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
+								</MudForm>
+							</MudCardContent>
+						</MudCard>
+					</MudContainer>
+				</NotAuthorized>
+			</AuthorizeView>
+		</CascadingAuthenticationState>
 	</MudMainContent>
 </MudLayout>
 
@@ -60,10 +64,20 @@
 	public bool IsDarkMode { get; set; }
 	string? email = null;
 
-	private string username;
-	private string password;
+	private string? username;
+	private string? password;
 
 	DrawerClipMode clipMode = DrawerClipMode.Never;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			username = (await ProtectedSessionStore.GetAsync<string>("username")).Value ?? username;
+			password = (await ProtectedSessionStore.GetAsync<string>("password")).Value ?? password;
+			await AuthenticateUser(username, password, true);
+		}
+	}
 
 	void ToggleDrawer()
 	{
@@ -76,37 +90,58 @@
 		await UserService.SetDarkmodeAsync(email, IsDarkMode);
 	}
 
-	private async Task SubmitForm()
+	private async Task AuthenticateUser(string? _username, string? _password, bool isEncrypted = false)
 	{
-		// Perform authentication logic here
-
-		// Example: Simulate authentication with a simple check
-		if (username == "demo" && password == "demo")
+		if (_username != null && _password != null)
 		{
-			var identity = new ClaimsIdentity(new[]
+			// Perform authentication logic here
+			var userAuthenticated = false;
+
+			if (userAuthenticated)
 			{
-				new Claim(ClaimTypes.Name, username),
+				var identity = new ClaimsIdentity(new[]
+				{
+				new Claim(ClaimTypes.Name, _username),
 			}, "custom");
 
-			var user = new ClaimsPrincipal(identity);
+				var user = new ClaimsPrincipal(identity);
 
-			var authState = new AuthenticationState(user);
+				var authState = new AuthenticationState(user);
 
-			// Store Auth State
-			await ProtectedSessionStore.SetAsync("username", username);
-			await ProtectedSessionStore.SetAsync("password", password);
+				var key = await AesService.GetKey(_username);
 
-			// In a Blazor Server app, use the following code to set the authentication state
-			((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+				if (key == null)
+				{
+					ShowFailedLoginMessage();
+				}
+				else
+				{
+					// Store Auth State
+					await ProtectedSessionStore.SetAsync("username", _username);
+					await ProtectedSessionStore.SetAsync("password", AesService.Encrypt(key, _password));
 
-			// Redirect to the home page or another protected page
-			NavigationManager.NavigateTo("/");
+					// In a Blazor Server app, use the following code to set the authentication state
+					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+					StateHasChanged();
+				}
+			}
+			else
+			{
+				// Handle invalid login
+				ShowFailedLoginMessage();
+			}
 		}
-		else
-		{
-			// Handle invalid login
-			// Show error message or redirect to an error page
-			NavigationManager.NavigateTo("/error");
-		}
+	}
+
+	private void ShowFailedLoginMessage()
+	{
+		this.Snackbar.Clear();
+		this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+		this.Snackbar.Add("Incorrect Username or Password", Severity.Error);
+	}
+
+	private async Task SubmitForm()
+	{
+		await AuthenticateUser(username, password);
 	}
 }

@@ -1,10 +1,21 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using TreatsAndTails.Models;
 
 namespace TreatsAndTails.Components.Services
 {
     public class AesService
     {
-        public static byte[] Encrypt(byte[] key, string original)
+		private readonly TatContext _context;
+
+		public AesService(TatContext context)
+		{
+			this._context = context;
+		}
+
+		public static byte[] Encrypt(byte[] key, string original)
         {
             byte[] encrypted;
 
@@ -27,6 +38,11 @@ namespace TreatsAndTails.Components.Services
             }
             return decrypted;
         }
+
+        public async Task<byte[]?> GetKey(string username)
+        {
+			return (await _context.Users.FirstOrDefaultAsync(x => x.Email == username))?.Id.ToByteArray();
+		}
 
         #region HelperMethods
         private static byte[] EncryptStringToBytes(string plainText, byte[] key, byte[] iv)
