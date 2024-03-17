@@ -116,8 +116,7 @@
 			RuleFor(x => x.Email)
 				.Cascade(CascadeMode.Stop)
 				.NotEmpty()
-				.EmailAddress()
-				.MustAsync(async (value, cancellationToken) => await IsUniqueAsync(value));
+				.EmailAddress();
 
 			RuleFor(user => user.Password)
 				.NotEmpty().WithMessage("Password is required.")
@@ -142,13 +141,6 @@
 			RuleFor(x => x.PhoneNumber)
 				.NotEmpty().WithMessage("Phone number is required.")
 				.Matches(@"^\(\d{3}\)\d{3}-\d{4}$").WithMessage("Invalid phone number format. Please use the format (123)456-789");
-		}
-
-		private async Task<bool> IsUniqueAsync(string email)
-		{
-			// Simulates a long running http call
-			await Task.Delay(2000);
-			return email.ToLower() != "test@test.com";
 		}
 
 		public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>

@@ -8,11 +8,8 @@
 @using TreatsAndTails.Components.Shared
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedSessionStorage ProtectedSessionStore
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 @inject UserService UserService
-@inject AesService AesService
 @inject ISnackbar Snackbar
 
 <MyMudThemeProvider _IsDarkMode="@isDarkMode"></MyMudThemeProvider>
