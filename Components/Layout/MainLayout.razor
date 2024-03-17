@@ -8,6 +8,7 @@
 @using TreatsAndTails.Components.Shared
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedSessionStorage ProtectedSessionStore
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inherits LayoutComponentBase
 @inject UserService UserService
 @inject ISnackbar Snackbar
@@ -75,14 +76,28 @@
 	{
 		if (firstRender)
 		{
-			var authStateJson = (await ProtectedSessionStore.GetAsync<string?>("AuthState")).Value;
-			if (authStateJson != null)
+			var username = (await ProtectedSessionStore.GetAsync<string?>("username")).Value;
+			if (username != null)
 			{
-				var authState = JsonSerializer.Deserialize<AuthenticationState>(authStateJson);
-
-				if (authState != null)
+				var identity = new ClaimsIdentity(new[]
 				{
-					username = authState.User.Claims.FirstOrDefault(clm => clm.Type != null && clm.Type == ClaimTypes.Name)?.Value ?? "";
+					new Claim(ClaimTypes.Name, username),
+				}, "custom");
+
+				var user = new ClaimsPrincipal(identity);
+
+				var authState = new AuthenticationState(user);
+
+				try
+				{
+					// Set authentication state
+					await ProtectedSessionStore.SetAsync("username", username);
+					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+					StateHasChanged();
+				}
+				catch (Exception ex)
+				{
+					return;
 				}
 			}
 		}

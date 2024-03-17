@@ -100,19 +100,10 @@
 
 				var authState = new AuthenticationState(user);
 
-				// Configure JSON serializer options
-				var jsonOptions = new JsonSerializerOptions
-					{
-						ReferenceHandler = ReferenceHandler.Preserve
-					};
-
 				try
 				{
-					// Serialize the authentication state to JSON with Preserve reference handling
-					var authStateJson = JsonSerializer.Serialize(authState, jsonOptions);
-
 					// Set authentication state
-					await ProtectedSessionStore.SetAsync("AuthState", authStateJson);
+					await ProtectedSessionStore.SetAsync("username", _username);
 					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
 					StateHasChanged();
 				}
@@ -147,6 +138,6 @@
 	private async Task SubmitForm()
 	{
 		await AuthenticateUser(username, password);
-		username = "";
+		password = "";
 	}
 }
