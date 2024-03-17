@@ -44,6 +44,31 @@ namespace TreatsAndTails.Components.Services
 			return (await _context.Users.FirstOrDefaultAsync(x => x.Email == username))?.Id.ToByteArray();
 		}
 
+        public async Task<bool> AuthenticateUser(string username, string password)
+        {
+            var encryptionKey = await GetKey(username);
+            if (encryptionKey == null)
+            {
+                return await Task.FromResult(false);
+            }
+
+            var encryptedPassword = Encrypt(encryptionKey, password);
+
+            if(encryptedPassword == null || encryptedPassword.Length == 0)
+            {
+				return await Task.FromResult(false);
+			}
+
+            var storedPassword = (await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(username)))?.PasswordHash;
+
+			if (storedPassword == null || storedPassword.Length == 0)
+			{
+				return await Task.FromResult(false);
+			}
+
+            return storedPassword == encryptedPassword;
+		}
+
         #region HelperMethods
         private static byte[] EncryptStringToBytes(string plainText, byte[] key, byte[] iv)
         {

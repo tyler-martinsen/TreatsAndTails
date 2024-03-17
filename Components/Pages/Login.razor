@@ -1,4 +1,8 @@
-﻿@page "/login"
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using TreatsAndTails.Components
+@using TreatsAndTails.Components.Services
+@using TreatsAndTails.Components.Pages
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using TreatsAndTails.Components.Shared
@@ -6,66 +10,142 @@
 @inject ProtectedSessionStorage ProtectedSessionStore
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
+@inject UserService UserService
+@inject AesService AesService
+@inject ISnackbar Snackbar
 
 
-<CascadingAuthenticationState>
-	<AuthorizeView>
-		<Authorized>
-			<Error></Error>
-		</Authorized>
-		<NotAuthorized>
-			<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-				<MudCard>
-					<MudCardContent>
-						<MudForm>
-							<h1>Login</h1>
-							<MudTextField Label="Username" @bind-Value="username" />
-							<MudTextField Label="Password" Type="Password" @bind-Value="password" />
-							<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
-						</MudForm>
-					</MudCardContent>
-				</MudCard>
-			</MudContainer>
-		</NotAuthorized>
-	</AuthorizeView>
-</CascadingAuthenticationState>
+<MudCard>
+	<MudCardContent>
+		<MudForm>
+			<h1>Login</h1>
+			<MudTextField Label="Email" @bind-Value="username" />
+			<MudTextField Label="Password"
+						  Type="Password"
+						  @bind-Value="password"
+						  Variant="Variant.Filled"
+						  InputType="@PasswordInput"
+						  Adornment="Adornment.End"
+						  AdornmentIcon="@PasswordInputIcon"
+						  OnAdornmentClick="ButtonHidePassword"
+						  AdornmentAriaLabel="Show Password" />
+		</MudForm>
+	</MudCardContent>
+	<MudCardActions>
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await SubmitForm())">Login</MudButton>
+	</MudCardActions>
+</MudCard>
 
 
 @code {
-	private string username;
-	private string password;
+	bool isShow;
+	InputType PasswordInput = InputType.Password;
+	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
-	private async Task SubmitForm()
+	string? email = null;
+
+	private string? username;
+	private string? password;
+
+	void ButtonHidePassword()
 	{
-		// Perform authentication logic here
-
-		// Example: Simulate authentication with a simple check
-		if (username == "demo" && password == "demo")
+		@if (isShow)
 		{
-			var identity = new ClaimsIdentity(new[]
-			{
-				new Claim(ClaimTypes.Name, username),
-			}, "custom");
-
-			var user = new ClaimsPrincipal(identity);
-
-			var authState = new AuthenticationState(user);
-
-			// Store Auth State
-			await ProtectedSessionStore.SetAsync("username", username);
-			await ProtectedSessionStore.SetAsync("password", password);
-
-			// In a Blazor Server app, use the following code to set the authentication state
-			((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
-
-			// Redirect to the home page or another protected page
-			NavigationManager.NavigateTo("/");
+			isShow = false;
+			PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+			PasswordInput = InputType.Password;
 		}
 		else
 		{
-			// Handle invalid login
-			// Show error message or redirect to an error page
-			NavigationManager.NavigateTo("/error");
+			isShow = true;
+			PasswordInputIcon = Icons.Material.Filled.Visibility;
+			PasswordInput = InputType.Text;
 		}
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var authStateJson = (await ProtectedSessionStore.GetAsync<string?>("AuthState")).Value;
+			if (authStateJson != null)
+			{
+				var authState = JsonSerializer.Deserialize<AuthenticationState>(authStateJson);
+
+				if (authState != null)
+				{
+					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+					StateHasChanged();
+				}
+			}
+		}
+	}
+
+	private async Task AuthenticateUser(string? _username, string? _password)
+	{
+		if (_username != null && _password != null)
+		{
+			// Perform authentication logic here
+			var userAuthenticated = await AesService.AuthenticateUser(_username, _password);
+
+			if (userAuthenticated)
+			{
+				var identity = new ClaimsIdentity(new[]
+				{
+					new Claim(ClaimTypes.Name, _username),
+				}, "custom");
+
+				var user = new ClaimsPrincipal(identity);
+
+				var authState = new AuthenticationState(user);
+
+				// Configure JSON serializer options
+				var jsonOptions = new JsonSerializerOptions
+					{
+						ReferenceHandler = ReferenceHandler.Preserve
+					};
+
+				try
+				{
+					// Serialize the authentication state to JSON with Preserve reference handling
+					var authStateJson = JsonSerializer.Serialize(authState, jsonOptions);
+
+					// Set authentication state
+					await ProtectedSessionStore.SetAsync("AuthState", authStateJson);
+					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+					StateHasChanged();
+				}
+				catch (Exception ex)
+				{
+					ShowFailedLoginMessage();
+					return;
+				}
+
+				var key = await AesService.GetKey(_username);
+
+				if (key == null)
+				{
+					ShowFailedLoginMessage();
+				}
+			}
+			else
+			{
+				// Handle invalid login
+				ShowFailedLoginMessage();
+			}
+		}
+	}
+
+	private void ShowFailedLoginMessage(string message = "Incorrect Username or Password")
+	{
+		this.Snackbar.Clear();
+		this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+		this.Snackbar.Add(message, Severity.Error);
+	}
+
+	private async Task SubmitForm()
+	{
+		await AuthenticateUser(username, password);
 	}
 }

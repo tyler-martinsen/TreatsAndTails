@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 using TreatsAndTails.Components;
@@ -23,6 +24,7 @@ builder.Services.AddAuthentication("Cookies")
 	});
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<ProtectedSessionStorage>();
 
 var defaultConnectionPassword = Environment.GetEnvironmentVariable("DefaultConnectionPassword");
 

@@ -1,5 +1,8 @@
-﻿@using TreatsAndTails.Components
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using TreatsAndTails.Components
 @using TreatsAndTails.Components.Services
+@using TreatsAndTails.Components.Pages
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using TreatsAndTails.Components.Shared
@@ -12,7 +15,7 @@
 @inject AesService AesService
 @inject ISnackbar Snackbar
 
-<MyMudThemeProvider _IsDarkMode="@IsDarkMode"></MyMudThemeProvider>
+<MyMudThemeProvider _IsDarkMode="@isDarkMode"></MyMudThemeProvider>
 
 <MudSnackbarProvider></MudSnackbarProvider>
 
@@ -26,11 +29,7 @@
 		<MudDrawerHeader>
 			<MudImage Fluid="true" Src="images/branding/icon3.png" Alt="Icon" Class="rounded-lg" />
 		</MudDrawerHeader>
-		<MudNavMenu>
-			<MudNavLink Match="NavLinkMatch.All" Href="/">Home</MudNavLink>
-			<MudNavLink Match="NavLinkMatch.All" Href="/login">Login</MudNavLink>
-			<MudNavLink Match="NavLinkMatch.All" Href="/register">Register</MudNavLink>
-		</MudNavMenu>
+		<NavMenu></NavMenu>
 	</MudDrawer>
 	<MudMainContent>
 		<CascadingAuthenticationState>
@@ -40,16 +39,9 @@
 				</Authorized>
 				<NotAuthorized>
 					<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-						<MudCard>
-							<MudCardContent>
-								<MudForm>
-									<h1>Login</h1>
-									<MudTextField Label="Username" @bind-Value="username" />
-									<MudTextField Label="Password" Type="Password" @bind-Value="password" />
-									<MudButton Type="Submit" OnClick="(() => SubmitForm())">Login</MudButton>
-								</MudForm>
-							</MudCardContent>
-						</MudCard>
+						<Login></Login>
+						<MudDivider DividerType="DividerType.Middle" Class="my-6" />
+						<Register></Register>
 					</MudContainer>
 				</NotAuthorized>
 			</AuthorizeView>
@@ -61,87 +53,41 @@
 @code {
 	bool open { get; set; } = true;
 	bool dense { get; set; } = false;
-	public bool IsDarkMode { get; set; }
-	string? email = null;
-
-	private string? username;
-	private string? password;
+	public bool isDarkMode { get; set; }
 
 	DrawerClipMode clipMode = DrawerClipMode.Never;
+
+	string username { get; set; } = "";
+
+	private void ToggleDrawer()
+	{
+		open = !open;
+	}
+
+	private async void ToggleDarkmode()
+	{
+		isDarkMode = !isDarkMode;
+
+		if (!string.IsNullOrEmpty(username))
+		{
+			await UserService.SetDarkmodeAsync(username, isDarkMode);
+		}
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			username = (await ProtectedSessionStore.GetAsync<string>("username")).Value ?? username;
-			password = (await ProtectedSessionStore.GetAsync<string>("password")).Value ?? password;
-			await AuthenticateUser(username, password, true);
-		}
-	}
-
-	void ToggleDrawer()
-	{
-		open = !open;
-	}
-
-	async void ToggleDarkmode()
-	{
-		IsDarkMode = !IsDarkMode;
-		await UserService.SetDarkmodeAsync(email, IsDarkMode);
-	}
-
-	private async Task AuthenticateUser(string? _username, string? _password, bool isEncrypted = false)
-	{
-		if (_username != null && _password != null)
-		{
-			// Perform authentication logic here
-			var userAuthenticated = false;
-
-			if (userAuthenticated)
+			var authStateJson = (await ProtectedSessionStore.GetAsync<string?>("AuthState")).Value;
+			if (authStateJson != null)
 			{
-				var identity = new ClaimsIdentity(new[]
+				var authState = JsonSerializer.Deserialize<AuthenticationState>(authStateJson);
+
+				if (authState != null)
 				{
-				new Claim(ClaimTypes.Name, _username),
-			}, "custom");
-
-				var user = new ClaimsPrincipal(identity);
-
-				var authState = new AuthenticationState(user);
-
-				var key = await AesService.GetKey(_username);
-
-				if (key == null)
-				{
-					ShowFailedLoginMessage();
-				}
-				else
-				{
-					// Store Auth State
-					await ProtectedSessionStore.SetAsync("username", _username);
-					await ProtectedSessionStore.SetAsync("password", AesService.Encrypt(key, _password));
-
-					// In a Blazor Server app, use the following code to set the authentication state
-					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
-					StateHasChanged();
+					username = authState.User.Claims.FirstOrDefault(clm => clm.Type != null && clm.Type == ClaimTypes.Name)?.Value ?? "";
 				}
 			}
-			else
-			{
-				// Handle invalid login
-				ShowFailedLoginMessage();
-			}
 		}
-	}
-
-	private void ShowFailedLoginMessage()
-	{
-		this.Snackbar.Clear();
-		this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
-		this.Snackbar.Add("Incorrect Username or Password", Severity.Error);
-	}
-
-	private async Task SubmitForm()
-	{
-		await AuthenticateUser(username, password);
 	}
 }

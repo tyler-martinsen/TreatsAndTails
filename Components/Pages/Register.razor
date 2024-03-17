@@ -8,55 +8,53 @@
 
 <PageTitle>Register</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-	<MudCard>
-		<MudForm Model="@user" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
-			<MudCardContent>
-				<h1>Register</h1>
-				<MudTextField @bind-Value="user.Email"
-							  For="@(() => user.Email)"
-							  Immediate="true"
-							  Label="Email" />
-				<MudTextField @bind-Value="user.Password"
-							  For="@(() => user.Password)"
-							  Immediate="true"
-							  Label="Password"
-							  Variant="Variant.Filled"
-							  InputType="@PasswordInput"
-							  Adornment="Adornment.End"
-							  AdornmentIcon="@PasswordInputIcon"
-							  OnAdornmentClick="ButtonTestclick"
-							  AdornmentAriaLabel="Show Password" />
-				<MudTextField @bind-Value="user.PasswordConfirmed"
-							  For="@(() => user.PasswordConfirmed)"
-							  Immediate="true"
-							  Label="Confirm Password"
-							  Variant="Variant.Filled"
-							  InputType="@PasswordInput"
-							  Adornment="Adornment.End"
-							  AdornmentIcon="@PasswordInputIcon"
-							  OnAdornmentClick="ButtonTestclick"
-							  AdornmentAriaLabel="Show Password" />
-				<MudTextField @bind-Value="user.FirstName"
-							  For="@(() => user.FirstName)"
-							  Immediate="true"
-							  Label="First Name" />
-				<MudTextField @bind-Value="user.LastName"
-							  For="@(() => user.LastName)"
-							  Immediate="true"
-							  Label="Last Name" />
-				<MudTextField @bind-Value="user.PhoneNumber"
-							  For="@(() => user.PhoneNumber)"
-							  Immediate="true"
-							  Label="Phone Number"
-							  Mask="@(new PatternMask("(000)000-0000"))" />
-			</MudCardContent>
-		</MudForm>
-		<MudCardActions>
-			<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Register</MudButton>
-		</MudCardActions>
-	</MudCard>
-</MudContainer>
+<MudCard>
+	<MudForm Model="@user" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
+		<MudCardContent>
+			<h1>Register</h1>
+			<MudTextField @bind-Value="user.Email"
+						  For="@(() => user.Email)"
+						  Immediate="true"
+						  Label="Email" />
+			<MudTextField @bind-Value="user.Password"
+						  For="@(() => user.Password)"
+						  Immediate="true"
+						  Label="Password"
+						  Variant="Variant.Filled"
+						  InputType="@PasswordInput"
+						  Adornment="Adornment.End"
+						  AdornmentIcon="@PasswordInputIcon"
+						  OnAdornmentClick="ButtonTestclick"
+						  AdornmentAriaLabel="Show Password" />
+			<MudTextField @bind-Value="user.PasswordConfirmed"
+						  For="@(() => user.PasswordConfirmed)"
+						  Immediate="true"
+						  Label="Confirm Password"
+						  Variant="Variant.Filled"
+						  InputType="@PasswordInput"
+						  Adornment="Adornment.End"
+						  AdornmentIcon="@PasswordInputIcon"
+						  OnAdornmentClick="ButtonTestclick"
+						  AdornmentAriaLabel="Show Password" />
+			<MudTextField @bind-Value="user.FirstName"
+						  For="@(() => user.FirstName)"
+						  Immediate="true"
+						  Label="First Name" />
+			<MudTextField @bind-Value="user.LastName"
+						  For="@(() => user.LastName)"
+						  Immediate="true"
+						  Label="Last Name" />
+			<MudTextField @bind-Value="user.PhoneNumber"
+						  For="@(() => user.PhoneNumber)"
+						  Immediate="true"
+						  Label="Phone Number"
+						  Mask="@(new PatternMask("(000)000-0000"))" />
+		</MudCardContent>
+	</MudForm>
+	<MudCardActions>
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Register</MudButton>
+	</MudCardActions>
+</MudCard>
 
 @code {
 	[Inject] ISnackbar Snackbar { get; set; }
@@ -93,12 +91,18 @@
 
 		if (form.IsValid)
 		{
-			if(await UserService.AddUserAsync(user))
+			if (await UserService.AddUserAsync(user))
 			{
-				Snackbar.Add("Submited!");
-				NavigationManager.NavigateTo("/Login");
+				ShowRegisteredMessage();
 			}
 		}
+	}
+
+	private void ShowRegisteredMessage(string message = "User has been registered!")
+	{
+		this.Snackbar.Clear();
+		this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+		this.Snackbar.Add(message, MudBlazor.Severity.Success);
 	}
 
 	/// <summary>
