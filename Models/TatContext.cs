@@ -67,7 +67,7 @@ public partial class TatContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Products__3214EC076BBB1524");
+            entity.HasKey(e => e.Id).HasName("PK__Products__3214EC074398BA37");
 
             entity.ToTable("Products", "inventory");
 
@@ -90,7 +90,7 @@ public partial class TatContext : DbContext
 
         modelBuilder.Entity<State>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__States__3214EC07117E6E2D");
+            entity.HasKey(e => e.Id).HasName("PK__States__3214EC07A205342F");
 
             entity.ToTable("States", "lookups");
 
@@ -106,19 +106,17 @@ public partial class TatContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07D73FF19A");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC0707DBFA7B");
 
             entity.ToTable("Users", "users");
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D1053443CAC171").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D105345E551E63").IsUnique();
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
-            entity.Property(e => e.PasswordHash)
-                .HasMaxLength(32)
-                .IsFixedLength();
+            entity.Property(e => e.PasswordHash).HasMaxLength(512);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
             entity.Property(e => e.RegistrationDate)
                 .HasDefaultValueSql("(getdate())")

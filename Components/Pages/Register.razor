@@ -6,8 +6,6 @@
 
 @page "/register"
 
-<PageTitle>Register</PageTitle>
-
 <MudCard>
 	<MudForm Model="@user" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
 		<MudCardContent>
@@ -93,6 +91,7 @@
 		{
 			if (await UserService.AddUserAsync(user))
 			{
+				user = new _User();
 				ShowRegisteredMessage();
 			}
 		}

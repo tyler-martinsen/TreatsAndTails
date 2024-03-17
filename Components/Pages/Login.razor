@@ -12,8 +12,9 @@
 @inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 @inject UserService UserService
-@inject AesService AesService
 @inject ISnackbar Snackbar
+
+<PageTitle>Login/Register</PageTitle>
 
 <MudCard>
 	<MudCardContent>
@@ -86,7 +87,7 @@
 		if (_username != null && _password != null)
 		{
 			// Perform authentication logic here
-			var userAuthenticated = await AesService.AuthenticateUser(_username, _password);
+			var userAuthenticated = await UserService.AuthenticateUser(_username, _password);
 
 			if (userAuthenticated)
 			{
@@ -121,7 +122,7 @@
 					return;
 				}
 
-				var key = await AesService.GetKey(_username);
+				var key = await UserService.GetKey(_username);
 
 				if (key == null)
 				{
@@ -146,5 +147,6 @@
 	private async Task SubmitForm()
 	{
 		await AuthenticateUser(username, password);
+		username = "";
 	}
 }
