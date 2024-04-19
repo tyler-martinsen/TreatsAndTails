@@ -4,8 +4,6 @@
 @inject UserService UserService
 @inject NavigationManager NavigationManager
 
-@page "/register"
-
 <MudCard>
 	<MudForm Model="@user" @ref="@form" Validation="@(orderValidator.ValidateValue)" ValidationDelay="0">
 		<MudCardContent>

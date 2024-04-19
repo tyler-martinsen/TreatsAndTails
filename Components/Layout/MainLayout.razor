@@ -23,7 +23,15 @@
 		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
 		<MudSpacer />
 		<MudSwitch ValueChanged="@ToggleDarkmode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
-		<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="Logout">Logout</MudButton>
+		<CascadingAuthenticationState>
+			<AuthorizeView>
+				<Authorized>
+					<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="Logout">Logout</MudButton>
+				</Authorized>
+			</AuthorizeView>
+		</CascadingAuthenticationState>
+
+
 	</MudAppBar>
 	<MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive">
 		<MudDrawerHeader>
@@ -37,6 +45,7 @@
 						<NavMenu></NavMenu>
 					</Authorized>
 					<NotAuthorized>
+						<NavMenuNotLoggedIn></NavMenuNotLoggedIn>
 					</NotAuthorized>
 				</AuthorizeView>
 			</CascadingAuthenticationState>
@@ -45,19 +54,26 @@
 	<MudMainContent>
 		@if (authDone)
 		{
-			<CascadingAuthenticationState>
-				<AuthorizeView>
-					<Authorized>
-						@Body
-					</Authorized>
-					<NotAuthorized>
-						<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-							<Login></Login>
-							<Register></Register>
-						</MudContainer>
-					</NotAuthorized>
-				</AuthorizeView>
-			</CascadingAuthenticationState>
+			if (noLoginNeeded)
+			{
+				@Body
+			}
+			else
+			{
+				<CascadingAuthenticationState>
+					<AuthorizeView>
+						<Authorized>
+							@Body
+						</Authorized>
+						<NotAuthorized>
+							<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
+								<Login></Login>
+								<Register></Register>
+							</MudContainer>
+						</NotAuthorized>
+					</AuthorizeView>
+				</CascadingAuthenticationState>
+			}
 		}
 	</MudMainContent>
 </MudLayout>
@@ -69,6 +85,8 @@
 	public bool isDarkMode { get; set; }
 
 	bool authDone { get; set; } = false;
+
+	bool noLoginNeeded { get; set; } = false;
 
 	DrawerClipMode clipMode = DrawerClipMode.Never;
 
@@ -111,6 +129,16 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		// Check if page needs login or not
+		List<string> noLoginPage = new();
+		noLoginPage.Add("");
+		noLoginPage.Add("/inventory");
+		var currentPage = NavigationManager.Uri.Split("/").Last();
+		if (noLoginPage.Contains(currentPage))
+		{
+			noLoginNeeded = true;
+		}
+
 		if (firstRender)
 		{
 			var username = (await ProtectedSessionStore.GetAsync<string?>("username")).Value;
