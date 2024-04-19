@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using TreatsAndTails.Components.Shared
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStore
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inherits LayoutComponentBase
@@ -22,12 +23,24 @@
 		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
 		<MudSpacer />
 		<MudSwitch ValueChanged="@ToggleDarkmode" id="DarkModeSwitch" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
+		<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="Logout">Logout</MudButton>
 	</MudAppBar>
 	<MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive">
 		<MudDrawerHeader>
 			<MudImage Fluid="true" Src="images/branding/icon3.png" Alt="Icon" Class="rounded-lg" />
 		</MudDrawerHeader>
-		<NavMenu></NavMenu>
+		@if (authDone)
+		{
+			<CascadingAuthenticationState>
+				<AuthorizeView>
+					<Authorized>
+						<NavMenu></NavMenu>
+					</Authorized>
+					<NotAuthorized>
+					</NotAuthorized>
+				</AuthorizeView>
+			</CascadingAuthenticationState>
+		}
 	</MudDrawer>
 	<MudMainContent>
 		@if (authDone)
@@ -66,6 +79,26 @@
 		open = !open;
 	}
 
+	private async Task Logout()
+	{
+		// Clear the ProtectedSessionStore
+		await ProtectedSessionStore.DeleteAsync("username");
+
+		// Update the AuthenticationState to log out the user
+		var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authenticationState.User;
+
+		// Create an anonymous identity
+		var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+
+		// Update the AuthenticationState with the anonymous identity
+		var anonymousAuthenticationState = new AuthenticationState(anonymousUser);
+		((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(anonymousAuthenticationState);
+
+		// Redirect to the home page or login page after logout
+		NavigationManager.NavigateTo("/");
+	}
+
 	private async void ToggleDarkmode()
 	{
 		isDarkMode = !isDarkMode;
@@ -97,8 +130,6 @@
 					// Set authentication state
 					await ProtectedSessionStore.SetAsync("username", username);
 					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
-					authDone = true;
-					StateHasChanged();
 				}
 				catch (Exception ex)
 				{
@@ -106,10 +137,7 @@
 				}
 			}
 		}
-		else
-		{
-			authDone = true;
-			StateHasChanged();
-		}
+		authDone = true;
+		StateHasChanged();
 	}
 }
