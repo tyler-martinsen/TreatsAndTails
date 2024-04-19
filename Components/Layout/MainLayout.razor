@@ -30,20 +30,22 @@
 		<NavMenu></NavMenu>
 	</MudDrawer>
 	<MudMainContent>
-		<CascadingAuthenticationState>
-			<AuthorizeView>
-				<Authorized>
-					@Body
-				</Authorized>
-				<NotAuthorized>
-					<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
-						<Login></Login>
-						<MudDivider DividerType="DividerType.Middle" Class="my-6" />
-						<Register></Register>
-					</MudContainer>
-				</NotAuthorized>
-			</AuthorizeView>
-		</CascadingAuthenticationState>
+		@if (authDone)
+		{
+			<CascadingAuthenticationState>
+				<AuthorizeView>
+					<Authorized>
+						@Body
+					</Authorized>
+					<NotAuthorized>
+						<MudContainer MaxWidth="MaxWidth.Small" Class="my-2 pt-2">
+							<Login></Login>
+							<Register></Register>
+						</MudContainer>
+					</NotAuthorized>
+				</AuthorizeView>
+			</CascadingAuthenticationState>
+		}
 	</MudMainContent>
 </MudLayout>
 
@@ -52,6 +54,8 @@
 	bool open { get; set; } = true;
 	bool dense { get; set; } = false;
 	public bool isDarkMode { get; set; }
+
+	bool authDone { get; set; } = false;
 
 	DrawerClipMode clipMode = DrawerClipMode.Never;
 
@@ -93,6 +97,7 @@
 					// Set authentication state
 					await ProtectedSessionStore.SetAsync("username", username);
 					((CustomAuthenticationStateProvider)AuthenticationStateProvider).SetAuthenticationState(authState);
+					authDone = true;
 					StateHasChanged();
 				}
 				catch (Exception ex)
@@ -100,6 +105,11 @@
 					return;
 				}
 			}
+		}
+		else
+		{
+			authDone = true;
+			StateHasChanged();
 		}
 	}
 }

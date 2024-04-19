@@ -1,0 +1,49 @@
+﻿<h3>Inventory</h3>
+@page "/inventory"
+
+@using TreatsAndTails.Components.Services
+@using TreatsAndTails.Models;
+@inject InventoryService InventoryService
+
+@if (products != null)
+{
+	<PageTitle>Treats</PageTitle>
+
+	<MudContainer MaxWidth="MaxWidth.Medium" Class="my-2 pt-2">
+		<MudCard Class="p-4" Padding="Padding.Medium">
+			<MudCardContent>
+				<MudTable Items="@products">
+					<HeaderContent>
+						<MudTh>Shape</MudTh>
+						<MudTh>Flavor</MudTh>
+						<MudTh>Size</MudTh>
+						<MudTh>Description</MudTh>
+						<MudTh>Cost</MudTh>
+						<MudTh>Quantity</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd DataLabel="Shape">@context.InvShape</MudTd>
+							<MudTd DataLabel="Flavor">@context.InvFlavor</MudTd>
+							<MudTd DataLabel="Size">@context.InvSize</MudTd>
+							<MudTd DataLabel="Description">@context.InvDescription</MudTd>
+							<MudTd DataLabel="Cost">@context.Cost</MudTd>
+							<MudTd DataLabel="Quantity">@context.Quantity</MudTd>
+						</RowTemplate>
+					</MudTable>
+				</MudCardContent>
+			</MudCard>
+		</MudContainer>
+}
+else
+{
+	<Error></Error>
+}
+
+@code {
+	private List<Product>? products = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		products = await InventoryService.GetInventory();
+	}
+}

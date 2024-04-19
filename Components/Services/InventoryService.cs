@@ -1,4 +1,5 @@
-﻿using TreatsAndTails.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using TreatsAndTails.Models;
 
 namespace TreatsAndTails.Components.Services
 {
@@ -12,9 +13,9 @@ namespace TreatsAndTails.Components.Services
             this._context = context;
         }
 
-        public List<Product> GetInventory()
+        public async Task<List<Product>> GetInventory()
         {
-            return _context.Products.ToList();
+            return await _context.Products.ToListAsync();
         }
     }
 }
