@@ -1,0 +1,57 @@
+﻿@page "/admin/edit-inventory"
+@using TreatsAndTails.Components.Services
+@using TreatsAndTails.Models;
+@inject InventoryService InventoryService
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+@if (products != null)
+{
+	<PageTitle>Treats</PageTitle>
+
+	<MudContainer MaxWidth="MaxWidth.Medium" Class="my-2 pt-2">
+		<MudCard Class="p-4" Padding="Padding.Medium">
+			<MudCardContent>
+				<MudTable Items="@products">
+					<HeaderContent>
+						<MudTh>Shape</MudTh>
+						<MudTh>Flavor</MudTh>
+						<MudTh>Size</MudTh>
+						<MudTh>Description</MudTh>
+						<MudTh>Cost</MudTh>
+						<MudTh>Quantity</MudTh>
+						<MudTh>Edit</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd DataLabel="Shape">@context.InvShape</MudTd>
+							<MudTd DataLabel="Flavor">@context.InvFlavor</MudTd>
+							<MudTd DataLabel="Size">@context.InvSize</MudTd>
+							<MudTd DataLabel="Description">@context.InvDescription</MudTd>
+							<MudTd DataLabel="Cost">@context.Cost</MudTd>
+							<MudTd DataLabel="Quantity">@context.Quantity</MudTd>
+							<MudTd DataLabel="Edit">
+								<MudButton @onclick="@(args => EditProduct(@context.Id))" Variant="Variant.Filled" Color="Color.Primary">Edit Product</MudButton>
+							</MudTd>
+						</RowTemplate>
+					</MudTable>
+				</MudCardContent>
+			</MudCard>
+		</MudContainer>
+}
+
+@code {
+	private List<Product>? products = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		products = await InventoryService.GetInventory();
+	}
+
+	private async Task EditProduct(int id)
+	{
+		var parameters = new DialogParameters<AdminProductDialogue> { { x => x.ProductId, id } };
+
+		var dialog = await DialogService.ShowAsync<AdminProductDialogue>("Edit Product", parameters);
+		var result = await dialog.Result;
+	}
+}
